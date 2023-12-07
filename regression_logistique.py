@@ -1,32 +1,72 @@
-class Regression_logistique(object):
-    def __init__(self,X, Y):
-        self.X = X
-        self.Y = Y
-
-
-# TODO : Implémenter ca bien
-# Tableux de features et de label
-X = data[columns_names[:-1]] # Features
-Y = data[columns_names[-1]] # Classes
-
-print(data) #Visulalisation
-
-
-# Preparation des données
-#Séparation des données en un ensemble d'entraînement et de test
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25, random_state=16)
-# instanciation du modèle
-logreg = LogisticRegression(random_state=16)
-
-# entrainement
-logreg.fit(X_train, y_train)
-
-y_pred = logreg.predict(X_test)
-
-# import the metrics class
+from sklearn.model_selection import train_test_split, RepeatedStratifiedKFold
+from sklearn.preprocessing import MinMaxScaler,StandardScaler
+from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
+class RegressionLogistique(object):
+    def __init__(self, data, features_names=0, features_nbr=0):
+        self. logreg = LogisticRegression(random_state=16)
+        self.data = data
+        self.features_names = features_names
+        self.features_nbr = features_nbr
 
-cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
-cnf_matrix
+    def train(self, X_train, y_train, cross_val=False):
 
 
+        if cross_val :
+            cross_validation = RepeatedStratifiedKFold(n_splits = 10,n_repeats = 3,random_state = 1)
+        else :
+            self.logreg.fit(X_train, y_train)
+
+    def predict(self, X):
+        # Prédiction
+        y_pred = self.logreg.predict(X)
+        return y_pred
+
+    def scale_data(self):
+        # TODO : Boucler sur les features à changer pour améliorer la modularité
+        """Met à l'échelle les données.
+
+           Cette fonction normalise les données qui ne suivent pas une distribution gaussienne et
+           standardise les données qui en suivent une mais dont les valeurs sont trop petites ou trop grandes
+           par rapport aux autres features.
+           Elle utilise les Scaler de la bibliothèque sklearn
+
+           Paramètres
+           ------
+           features_to_normalise :  liste de string contenant les features devant être normalisées
+                                    (suite à la visualisation des données)
+           features_to_standardise : liste de string contenant les features devant être normalisées
+                                     (suite à la visualisation des données)
+           Retourne
+           -------
+           scaled_data : dataframe contenant les données mise à l'échelle
+           """
+        mms = MinMaxScaler()  # Normalisation
+        ss = StandardScaler()  # Standardssation
+
+        scaled_data = self.data
+        scaled_data['Oldpeak'] = mms.fit_transform(scaled_data[['Oldpeak']])
+
+        scaled_data['Age'] = ss.fit_transform(scaled_data[['Age']])
+        scaled_data['RestingBP'] = ss.fit_transform(scaled_data[['RestingBP']])
+        scaled_data['Cholesterol'] = ss.fit_transform(scaled_data[['Cholesterol']])
+        scaled_data['MaxHR'] = ss.fit_transform(scaled_data[['MaxHR']])
+
+        return scaled_data
+    def split_data(self, data):
+        # Séparation des données en un ensemble d'entraînement et de test
+        # Tableux de features et de label
+        X = data[self.features_names[:-1]]  # Features
+        Y = data[self.features_names[-1]]  # Classes
+        # Séparation des données en un ensemble de test (20%) et d'entraînement: (80%)
+        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.20, random_state=16)
+        return X_train, X_test, y_train, y_test
+
+    def evaluate_model(self, X, y, confusion_matrix = True, accuracy = True):
+        y_pred = self.predict(X)
+        if confusion_matrix:
+            confusion_mtrx = metrics.confusion_matrix(y, y_pred)
+            print(confusion_mtrx)
+        if accuracy:
+            accu = metrics.accuracy_score(y,y_pred)
+            print(f"accuracy du modèle : {accu}")
