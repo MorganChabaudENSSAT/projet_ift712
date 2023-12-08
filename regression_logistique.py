@@ -13,11 +13,24 @@ class RegressionLogistique(object):
 
 
         if cross_val :
+            self.logreg.fit(X_train, y_train)
+
             cross_validation = RepeatedStratifiedKFold(n_splits = 10,n_repeats = 3,random_state = 1)
         else :
             self.logreg.fit(X_train, y_train)
 
     def predict(self, X):
+        ''' Predit la classe de l'échantillon.
+            Cette fonction présuppose que la fonction train a été appelée auparavant
+
+            Paramètres
+            ------
+            X : vecteur contenant un échantillon
+
+            Retourne
+            ------
+            La classe prédite par le modèle de regréssion logistique
+        '''
         # Prédiction
         y_pred = self.logreg.predict(X)
         return y_pred
@@ -45,7 +58,7 @@ class RegressionLogistique(object):
         ss = StandardScaler()  # Standardssation
 
         scaled_data = self.data
-        scaled_data['Oldpeak'] = mms.fit_transform(scaled_data[['Oldpeak']])
+        #scaled_data['Oldpeak'] = mms.fit_transform(scaled_data[['Oldpeak']])
 
         scaled_data['Age'] = ss.fit_transform(scaled_data[['Age']])
         scaled_data['RestingBP'] = ss.fit_transform(scaled_data[['RestingBP']])
