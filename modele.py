@@ -6,32 +6,33 @@ from sklearn import metrics
 
 class Modele(ABC):
     def __init__(self, data, features_names=0, features_nbr=0, model=None):
-        self.model = model
-        self.data = data
-        self.features_names = features_names
-        self.features_nbr = features_nbr
+        self.model = model  # estimateur sklearn correspondant au modèle
+        self.data = data    # dataframe contenant l'ensemble des données
+        self.features_names = features_names    # Str_list conteannt les noms des featiures
+        self.features_nbr = features_nbr    # entier : nombre de features
 
     def predict(self, X):
-        """ Predit la liste des classes de des données X passée en paramètres de la fonction.
-            Cette fonction présuppose que la fonction train a été appelée auparavant
+        """Predit la liste des classes de des données X passée en paramètres de la fonction.
+        Cette fonction présuppose que la fonction train a été appelée auparavant
 
-            Paramètres
-            ------
-            X : Tableau (N,D) contenant les échantillons
-
-            Retourne
-            ------
-            La liste des classes prédites par le modèle de regréssion logistique
+        :param X: Dataframe (N,D) contenant les échantillons
+        :return: La liste des classes prédites par le modèle de regréssion logistique
         """
         # Prédiction
         y_pred = self.model.predict(X)
         return y_pred
 
-    def train(self, X_train, y_train):
-        self.model.fit(X_train, y_train)
+    def train(self, X, y):
+        """Entraîne le modèle sur les données passée en paramètre
+
+        :param X: Dataframe contenant les données d'entraînement
+        :param y: Dataframe de labels pour l'entraînement
+        :return: None
+        """
+        self.model.fit(X, y)
 
 
-    def scale_data(self):
+    def scale_data(self, features_to_normalise, features_to_standardise):
         # TODO : Boucler sur les features à changer pour améliorer la modularité
         """Met à l'échelle les données.
 
@@ -51,23 +52,35 @@ class Modele(ABC):
            scaled_data : dataframe contenant les données mise à l'échelle
            """
         mms = MinMaxScaler()  # Normalisation
-        ss = StandardScaler()  # Standardssation
+        ss = StandardScaler()  # Standardisation
 
         scaled_data = self.data
-        # scaled_data['Oldpeak'] = mms.fit_transform(scaled_data[['Oldpeak']])
 
-        scaled_data['Age'] = ss.fit_transform(scaled_data[['Age']])
-        scaled_data['RestingBP'] = ss.fit_transform(scaled_data[['RestingBP']])
-        scaled_data['Cholesterol'] = ss.fit_transform(scaled_data[['Cholesterol']])
-        scaled_data['MaxHR'] = ss.fit_transform(scaled_data[['MaxHR']])
+        for feature_name in features_to_normalise :
+            scaled_data[feature_name] = mms.fit_transform(scaled_data[[feature_name]])
+
+        for feature_name in features_to_standardise :
+            scaled_data[feature_name] = ss.fit_transform(scaled_data[[feature_name]])
 
         return scaled_data
 
 
-    def split_data(self, data):
-        # Séparation des données en un ensemble d'entraînement et de test
+    def split_data(self, data, test_size=0.20):
+        """Sépare les données en 4 dataframes conteant les données d'entraînement et les labels associés ainsi que les
+        données de tests avec les labels associés
+
+        :param data:  dataframe contenant l'ensemble des données
+        :param test_size : float indiquant le pourcentage de répartition des données entre les ensembles d'entraînement
+        et de test. 80% pour l'entraîenemnt et 20% pour les tests par défaut
+
+        :return:
+        X_train : Dataframe de taille (test_size*N, D) contenant les données d'entrainement
+        X_test : Dataframe de taille (test_size*N, D) contenant les données de test
+        y_train : labels associés aux données d'entraîenemn,t
+        y_test : labels associés aux données d'entraînement
+        """
+
         # Tableux de features et de label
-        print(data)
         X = data[self.features_names[:-1]]  # Features
         Y = data[self.features_names[-1]]  # Classes
         # Séparation des données en un ensemble de test (20%) et d'entraînement: (80%)
@@ -75,6 +88,15 @@ class Modele(ABC):
         return X_train, X_test, y_train, y_test
 
     def evaluate_model(self, X, y, confusion_matrix=True, accuracy=True):
+        """Evalue le modèle sommairement en affichant la matrice de confusion et l'accuracy associée à la prédiction du
+        modèle sur l'ensmeble de données fourni
+
+        :param X: Dataframe contenant les données à prédire
+        :param y: Liste des labels des données
+        :param confusion_matrix: Booléen indiquant si il faut afficher la matric de confusion
+        :param accuracy: Booléen indiquant s'il faut afficher l'accuray
+        :return:
+        """
         y_pred = self.predict(X)
         if confusion_matrix:
             confusion_mtrx = metrics.confusion_matrix(y, y_pred)
