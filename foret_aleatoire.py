@@ -1,32 +1,7 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedShuffleSplit
-from sklearn.preprocessing import LabelEncoder
-import pandas as pd
+from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit
 
 from modele import Modele
-
-#######################
-# A RETIRER PLUS TARD #
-#######################
-# Importation des données
-df = pd.read_csv('heart.csv')  # Dataframe contenant les données
-features_names = df.columns
-features_nbr = features_names.shape[0]
-print(f"nombre de features dans le dataset : {features_nbr}")
-# Visualisation des données pour mieux les comprendre
-print(df.head())
-print(df.dtypes)
-le = LabelEncoder()
-
-data = df.copy(deep=True)
-
-data['Sex'] = le.fit_transform(data['Sex'])
-data['ChestPainType'] = le.fit_transform(data['ChestPainType'])
-data['RestingECG'] = le.fit_transform(data['RestingECG'])
-data['ExerciseAngina'] = le.fit_transform(data['ExerciseAngina'])
-data['ST_Slope'] = le.fit_transform(data['ST_Slope'])
-
-print(data.head())
 
 class foret_aleatoire(Modele):
     def __init__(self, data, features_names=0, features_nbr=0, model=None):
@@ -40,7 +15,7 @@ class foret_aleatoire(Modele):
         :param X_train: Tableau (N, D) contenant les données d'entraînement
         :param y_train: Tableau (N,1) contenant les label des données d'entraînement
         
-        :return: la forêt aléatoire avec les meilleures hyperparamètres dépendemment du noyau utilisé
+        :return: la forêt aléatoire avec les meilleurs hyperparamètres
         """
         
         # Définissez l'espace des hyperparamètres à explorer
