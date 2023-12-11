@@ -99,26 +99,26 @@ class Modele(ABC):
         :param accuracy: Booléen indiquant s'il faut afficher l'accuray
         :return:
         """
-        # y_pred = self.predict(X)
-        # if confusion_matrix:
-        #     confusion_mtrx = metrics.confusion_matrix(y, y_pred)
-        #     group_names = ['TrueNeg', 'FalsePos', 'FalseNeg','TruePos']
-        #     group_counts = ["{0: 0.0f}".format(value)
-        #     for value in confusion_mtrx.flatten()]
-        #     group_percentages =['{0:.2%}'.format(value) for value in confusion_mtrx.flatten() / np.sum(confusion_mtrx)]
-        #     labels =[f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in zip(group_names, group_counts, group_percentages)]
-        #     labels = np.asarray(labels).reshape(2, 2)
-        #     ax = plt.axes()
-        #     sns.heatmap(confusion_mtrx, annot=labels, fmt='', cmap='Blues')
-        #     ax.set_title("Matrice de confusion du modèle")
-        # if accuracy:
-        #     accu = metrics.accuracy_score(y, y_pred)
-        #     print(f"accuracy du modèle : {accu}")
-        
         y_pred = self.predict(X)
         if confusion_matrix:
             confusion_mtrx = metrics.confusion_matrix(y, y_pred)
-            print(confusion_mtrx)
+            group_names = ['TrueNeg', 'FalsePos', 'FalseNeg','TruePos']
+            group_counts = ["{0: 0.0f}".format(value)
+            for value in confusion_mtrx.flatten()]
+            group_percentages =['{0:.2%}'.format(value) for value in confusion_mtrx.flatten() / np.sum(confusion_mtrx)]
+            labels =[f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in zip(group_names, group_counts, group_percentages)]
+            labels = np.asarray(labels).reshape(2, 2)
+            ax = plt.axes()
+            sns.heatmap(confusion_mtrx, annot=labels, fmt='', cmap='Blues')
+            ax.set_title("Matrice de confusion du modèle")
         if accuracy:
             accu = metrics.accuracy_score(y, y_pred)
             print(f"accuracy du modèle : {accu}")
+        
+        # y_pred = self.predict(X)
+        # if confusion_matrix:
+        #     confusion_mtrx = metrics.confusion_matrix(y, y_pred)
+        #     print(confusion_mtrx/confusion_mtrx.sum())
+        # if accuracy:
+        #     accu = metrics.accuracy_score(y, y_pred)
+        #     print(f"Accuracy du modèle : {accu}")
