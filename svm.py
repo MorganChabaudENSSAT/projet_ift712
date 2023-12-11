@@ -1,5 +1,6 @@
+from matplotlib import pyplot as plt
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit
+from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit, learning_curve
 from sklearn import preprocessing
 
 from modele import Modele
@@ -62,6 +63,13 @@ class Svm(Modele):
             return grid.best_estimator_
         print("Erreur recherche hyper-paramètres")
         return self.model
+    
+    def plot_learning_curves(self, X_train, y_train, train_size):
+        N, train_score, val_score = learning_curve(self.model, X_train, y_train,train_sizes=train_size)
+        plt.plot(N,train_score.mean(axis=1),label="Score d'entraînement")
+        plt.plot(N,val_score.mean(axis=1),label="Score de validation")
+        plt.xlabel("Taille de l'ensemble d'entraînement")
+        plt.legend()
         
         
         
