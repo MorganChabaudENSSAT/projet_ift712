@@ -54,20 +54,11 @@ class foret_aleatoire(Modele):
 
         # Instanciez le modèle DecisionTreeClassifier
         rf_model = RandomForestClassifier(criterion='log_loss')
-
-        # Recherche aléatoire
-        random_search = RandomizedSearchCV(rf_model, param_distributions=param, n_iter=100, cv=5, n_jobs=-1, random_state=42)
-        random_search.fit(X_train, y_train)
         
         # Recherche stratifiée et exhaustive
         cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
         grid = GridSearchCV(self.model, param_grid=param, cv=cv, scoring='accuracy')
         grid.fit(X_train, y_train)
-
-        # Obtenez les meilleurs hyperparamètres
-        best_params = random_search.best_params_
-        print(f"Best Hyperparameters: {best_params}")
-        print(f'et {random_search.best_score_}')
 
         # Utilisez le modèle avec les meilleurs paramètres
         best_estimator = grid.best_estimator_
