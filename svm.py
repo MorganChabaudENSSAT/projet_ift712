@@ -1,15 +1,11 @@
-import numpy as np
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit, train_test_split
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
-from sklearn import metrics
-from abc import ABC, abstractmethod
-import pandas as pd
+from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit
+from sklearn import preprocessing
 
 from modele import Modele
 
 
-class svm(Modele):
+class Svm(Modele):
     def __init__(self, data, features_names=0, features_nbr=0, model=None):
         Modele.__init__(
             self=self,
