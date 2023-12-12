@@ -1,5 +1,6 @@
+from matplotlib import pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedShuffleSplit
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedShuffleSplit, learning_curve
 import numpy as np
 
 from modele import Modele
@@ -37,6 +38,14 @@ class foret_aleatoire(Modele):
         best_estimator = random_search.best_estimator_
         print(f'La meilleure précision trouvée est de {random_search.best_score_} pour les hyperparamètres suivants : {random_search.best_params_}')
         return best_estimator
+
+    def plot_learning_curves(self, X_train, y_train, train_size):
+        N, train_score, val_score = learning_curve(self.model, X_train, y_train,train_sizes=train_size)
+        plt.plot(N,train_score.mean(axis=1),label="Score d'entraînement")
+        plt.plot(N,val_score.mean(axis=1),label="Score de validation")
+        plt.xlabel("Taille de l'ensemble d'entraînement")
+        plt.legend()
+        
 
     
     def hyper_parameters_search(self, X_train, y_train, seed):

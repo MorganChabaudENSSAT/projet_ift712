@@ -1,91 +1,68 @@
-from sklearn.model_selection import train_test_split, RepeatedStratifiedKFold, cross_val_score
-from sklearn.preprocessing import MinMaxScaler,StandardScaler
+from sklearn.model_selection import train_test_split, RepeatedStratifiedKFold, cross_val_score, GridSearchCV, \
+    learning_curve
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 from sklearn import metrics
-class RegressionLogistique(object):
-    def __init__(self, data, features_names=0, features_nbr=0):
-        self. logreg = LogisticRegression(random_state=16, solver='newton-cg')
-        self.data = data
-        self.features_names = features_names
-        self.features_nbr = features_nbr
 
-    def recherche_hyper_parametres(self, X, y, cv_iter=5):
-        validation_scores = []
-        solvers = ['lbfgs', 'liblinear', 'newton-cg', 'newton-cholesky', 'sag', 'saga']
-        for s in solvers :
-            score = cross_val_score(LogisticRegression(random_state=16), X, y, cv=cv_iter).mean()
-            validation_scores.append(score)
-        plt.plot(solvers, validation_scores)
-    def train(self, X_train, y_train, cross_val=False):
-        self.logreg.fit(X_train, y_train)
+from modele import Modele
 
-    def predict(self, X):
-        ''' Predit la classe de l'échantillon.
-            Cette fonction présuppose que la fonction train a été appelée auparavant
 
-            Paramètres
-            ------
-            X : vecteur contenant un échantillon
+class RegressionLogistique(Modele):
+    def __init__(self, data, features_names, features_nbr, model=None):
+        Modele.__init__(
+            self=self,
+            data=data,
+            features_names=features_names,
+            features_nbr=features_nbr
+        )
+        if model is None :
+            self.model = LogisticRegression(random_state=0, C=10, penalty='l2')
+        else :
+            self.model = model
 
-            Retourne
-            ------
-            La classe prédite par le modèle de regréssion logistique
-        '''
-        # Prédiction
-        y_pred = self.logreg.predict(X)
-        return y_pred
+    def hyper_parameters_search(self, X_train, y_train, h_parameters_to_tune, cv=5):
+        """Recherche les meilleurs hyperparamètres pour la régression logistique par 'grid search' basée sur une
+        cross-validation. Affiche les meilleurs hyperparamètres et retourne le modèle associé.
 
-    def scale_data(self):
-        # TODO : Boucler sur les features à changer pour améliorer la modularité
-        """Met à l'échelle les données.
+        :param X_train: Tableau (N, D) contenant les données d'entraînement
+        :param y_train: Tableau (N,1) contenant les label des données d'entraîenment
+        :param h_parameters_to_tune: Dictionnaire contenant les hyperparamètres à tester ainsi que les valeurs qui
+                                     leurs sont associées
+        :param cv_iter: Nombre de répétitions dans le K-Fold
 
-           Cette fonction normalise les données qui ne suivent pas une distribution gaussienne et
-           standardise les données qui en suivent une mais dont les valeurs sont trop petites ou trop grandes
-           par rapport aux autres features.
-           Elle utilise les Scaler de la bibliothèque sklearn
+        :return: la régression avec les meilleures hyperparamètres
+        """
+        grid = GridSearchCV(LogisticRegression(), h_parameters_to_tune, cv=cv)
+        grid.fit(X_train, y_train)
+        print(grid.best_score_, " pour les hyperparamètres suivants : ", grid.best_params_)
+        return grid.best_estimator_
 
-           Paramètres
-           ------
-           features_to_normalise :  liste de string contenant les features devant être normalisées
-                                    (suite à la visualisation des données)
-           features_to_standardise : liste de string contenant les features devant être normalisées
-                                     (suite à la visualisation des données)
-           Retourne
-           -------
-           scaled_data : dataframe contenant les données mise à l'échelle
-           """
-        mms = MinMaxScaler()  # Normalisation
-        ss = StandardScaler()  # Standardssation
+    def K_fold(self, X_train, y_train, n_splits=10, n_repeats=3, scoring='accuracy'):
+        """ Applique une cross-validation stratifiée
 
-        scaled_data = self.data
-        #scaled_data['Oldpeak'] = mms.fit_transform(scaled_data[['Oldpeak']])
+        :param X_train: Tableau contenant les données d'entraînement
+        :param y_train: Tableau contenant les labels des données d'entraînement
+        :param n_splits: Entier correspondant au nombre de splits dans la cross validation (10 par défaut)
+        :param n_repeats: Entier : au nombre de fois que la cross-validation doit être répétée (3 par défaut)
+        :param scoring: metrique utilisée pour al cross-validation
+        :return: Affiche le score de cross validation.
+        """
+        cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+        cv_score = cross_val_score(self.model, X_train, y_train, cv=cv, scoring=scoring).mean()
+        print("Le score de cross-validation du modèle est: ", cv_score)
 
-        scaled_data['Age'] = ss.fit_transform(scaled_data[['Age']])
-        scaled_data['RestingBP'] = ss.fit_transform(scaled_data[['RestingBP']])
-        scaled_data['Cholesterol'] = ss.fit_transform(scaled_data[['Cholesterol']])
-        scaled_data['MaxHR'] = ss.fit_transform(scaled_data[['MaxHR']])
-
-        return scaled_data
-    def split_data(self, data):
-        # Séparation des données en un ensemble d'entraînement et de test
-        # Tableux de features et de label
-        X = data[self.features_names[:-1]]  # Features
-        Y = data[self.features_names[-1]]  # Classes
-        # Séparation des données en un ensemble de test (20%) et d'entraînement: (80%)
-        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.20, random_state=16)
-        return X_train, X_test, y_train, y_test
-
-    def evaluate_model(self, X, y, cv_iter=5 ,confusion_matrix = True, accuracy = True):
-        y_pred = self.predict(X)
-        print(self.logreg.score(X, y))
-
-        scores = cross_val_score(LogisticRegression(random_state=16), X, y, cv=cv_iter)
-        print('Le score de validation croisée est : ', str(scores.mean()), 'avec un déviation standard de : ', str(scores.std()))
-
-        if confusion_matrix:
-            confusion_mtrx = metrics.confusion_matrix(y, y_pred)
-            print(confusion_mtrx)
-        if accuracy:
-            accu = metrics.accuracy_score(y,y_pred)
-            print(f"accuracy du modèle : {accu}")
+    def data_needed_for_max_score(self, X_train, y_train, train_size):
+        """
+        :param X_train: Tableau (N, D) contenant les données d'entraînement
+        :param y_train: Tableau (N,1) contenant les label des données d'entraîenment
+        :param train_size: Entier correspondant au pourcentage de répartition des données entre les ensembles
+        d'entraînement et de test
+        :return: Affiche le graphique des scores des modèles en fonction du nombre de données d'entraînement
+        """
+        N, train_score, val_score = learning_curve(self.model, X_train, y_train, train_sizes=train_size,
+                                                   scoring="accuracy")
+        plt.plot(N, train_score.mean(axis=1), label="score d'entraîenemnt")
+        plt.plot(N, val_score.mean(axis=1), label="score de validation")
+        plt.xlabel("taille de l'ensemble d'entraînement")
+        plt.legend()
