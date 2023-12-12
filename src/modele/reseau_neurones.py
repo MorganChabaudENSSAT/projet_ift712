@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV, learning_curve
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from modele import Modele
+from modele.modele import Modele
 
 
 class Reseau_neurones(Modele):

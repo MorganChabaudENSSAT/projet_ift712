@@ -1,0 +1,46 @@
+@startuml diagramme_de_classe
+
+abstract class modele {
+    - Estimator model
+    - DataFrame data
+    - list(string) features_names
+    - int features_nbr
+
+    - scale_data(list(string) feature_to_normalize, list(string) feature_to_standardize)
+    - split_data()
+    - train()
+    - predict()
+    - evaluate()
+    - abstract find_best_hyperparameters()
+}
+
+class regression_logistique extends modele {
+    
+}
+
+class svm extends modele {
+
+}
+
+class reseau_neurones extends modele {
+
+}
+
+class k_plus_proches_voisins extends modele {
+
+}
+
+class foret_aleatoire extends modele {
+
+}
+
+class bayes_gaussien_naif extends modele {
+    
+}
+
+class s_check {
+}
+
+
+
+@enduml
