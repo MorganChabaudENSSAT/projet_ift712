@@ -5,7 +5,7 @@ import numpy as np
 from modele import Modele
 
 class foret_aleatoire(Modele):
-    def __init__(self, data, features_names=0, features_nbr=0, model=None):
+    def __init__(self, data, features_names, features_nbr, model):
         super().__init__(data=data, features_names=features_names, features_nbr=features_nbr)
         self.model = model
     
