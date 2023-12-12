@@ -2,7 +2,7 @@ from abc import ABC
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import learning_curve, train_test_split, cross_val_score
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn import metrics
 import seaborn as sns
@@ -101,6 +101,7 @@ class Modele(ABC):
         """
         y_pred = self.predict(X)
         if confusion_matrix:
+            plt.figure()
             confusion_mtrx = metrics.confusion_matrix(y, y_pred)
             group_names = ['TrueNeg', 'FalsePos', 'FalseNeg','TruePos']
             group_counts = ["{0: 0.0f}".format(value)
@@ -122,3 +123,11 @@ class Modele(ABC):
         # if accuracy:
         #     accu = metrics.accuracy_score(y, y_pred)
         #     print(f"Précision du modèle : {accu}")
+        
+    def plot_learning_curves(self, X_train, y_train, train_size):
+        plt.figure()
+        N, train_score, val_score = learning_curve(self.model, X_train, y_train,train_sizes=train_size, scoring='accuracy')
+        plt.plot(N,train_score.mean(axis=1),label="Score d'entraînement")
+        plt.plot(N,val_score.mean(axis=1),label="Score de validation")
+        plt.xlabel("Taille de l'ensemble d'entraînement")
+        plt.legend()
