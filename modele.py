@@ -96,7 +96,7 @@ class Modele(ABC):
         :param X: Dataframe contenant les données à prédire
         :param y: Liste des labels des données
         :param confusion_matrix: Booléen indiquant si il faut afficher la matric de confusion
-        :param accuracy: Booléen indiquant s'il faut afficher l'accuray
+        :param accuracy: Booléen indiquant s'il faut afficher l'accuracy
         :return:
         """
         y_pred = self.predict(X)
