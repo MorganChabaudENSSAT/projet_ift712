@@ -113,7 +113,7 @@ class Modele(ABC):
             ax.set_title("Matrice de confusion du modèle")
         if accuracy:
             accu = metrics.accuracy_score(y, y_pred)
-            print(f"accuracy du modèle : {accu}")
+            print(f"Précision du modèle : {accu}")
         
         # y_pred = self.predict(X)
         # if confusion_matrix:
@@ -121,4 +121,4 @@ class Modele(ABC):
         #     print(confusion_mtrx/confusion_mtrx.sum())
         # if accuracy:
         #     accu = metrics.accuracy_score(y, y_pred)
-        #     print(f"Accuracy du modèle : {accu}")
+        #     print(f"Précision du modèle : {accu}")
