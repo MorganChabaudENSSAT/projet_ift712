@@ -1,45 +1,47 @@
 from abc import ABC
+
+import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn import metrics
+import seaborn as sns
 
 
 class Modele(ABC):
-    def __init__(self, data, features_names=0, features_nbr=0, model=None):
+    def __init__(self, data, features_names, features_nbr, model=None):
         self.model = model  # estimateur sklearn correspondant au modèle
         self.data = data    # dataframe contenant l'ensemble des données
         self.features_names = features_names    # Str_list conteannt les noms des featiures
         self.features_nbr = features_nbr    # entier : nombre de features
 
     def predict(self, X):
-        """Predit la liste des classes de des données X passée en paramètres de la fonction.
-        Cette fonction présuppose que la fonction train a été appelée auparavant
+        """Predit la liste des classes des données X passées en paramètres de la fonction.
+        Cette fonction présuppose que la fonction train a été appelée auparavant.
 
         :param X: Dataframe (N,D) contenant les échantillons
-        :return: La liste des classes prédites par le modèle de regréssion logistique
+
+        :return: La liste des classes prédites par le modèle
         """
         # Prédiction
         y_pred = self.model.predict(X)
         return y_pred
 
     def train(self, X, y):
-        """Entraîne le modèle sur les données passée en paramètre
+        """Entraîne le modèle sur les données passées en paramètre
 
         :param X: Dataframe contenant les données d'entraînement
         :param y: Dataframe de labels pour l'entraînement
+
         :return: None
         """
         self.model.fit(X, y)
 
 
     def scale_data(self, features_to_normalise, features_to_standardise):
-        # TODO : Boucler sur les features à changer pour améliorer la modularité
         """Met à l'échelle les données.
 
-           Cette fonction normalise les données qui ne suivent pas une distribution gaussienne et
-           standardise les données qui en suivent une mais dont les valeurs sont trop petites ou trop grandes
-           par rapport aux autres features risquant de fausser artificiellement l'évaluation du modèle.
-           Elle utilise les Scaler de la bibliothèque sklearn
+           Cette fonction normalise les données ou standardise les données passées en paramètre.
 
            Paramètres
            ------
@@ -54,7 +56,7 @@ class Modele(ABC):
         mms = MinMaxScaler()  # Normalisation
         ss = StandardScaler()  # Standardisation
 
-        scaled_data = self.data
+        scaled_data = self.data.copy(deep = True)
 
         for feature_name in features_to_normalise :
             scaled_data[feature_name] = mms.fit_transform(scaled_data[[feature_name]])
@@ -66,7 +68,7 @@ class Modele(ABC):
 
 
     def split_data(self, data, test_size=0.20):
-        """Sépare les données en 4 dataframes conteant les données d'entraînement et les labels associés ainsi que les
+        """Sépare les données en 4 dataframes contenant les données d'entraînement et les labels associés ainsi que les
         données de tests avec les labels associés
 
         :param data:  dataframe contenant l'ensemble des données
@@ -76,7 +78,7 @@ class Modele(ABC):
         :return:
         X_train : Dataframe de taille (test_size*N, D) contenant les données d'entrainement
         X_test : Dataframe de taille (test_size*N, D) contenant les données de test
-        y_train : labels associés aux données d'entraîenemn,t
+        y_train : labels associés aux données d'entraînement
         y_test : labels associés aux données d'entraînement
         """
 
@@ -100,7 +102,15 @@ class Modele(ABC):
         y_pred = self.predict(X)
         if confusion_matrix:
             confusion_mtrx = metrics.confusion_matrix(y, y_pred)
-            print(confusion_mtrx)
+            group_names = ['TrueNeg', 'FalsePos', 'FalseNeg','TruePos']
+            group_counts = ["{0: 0.0f}".format(value)
+            for value in confusion_mtrx.flatten()]
+            group_percentages =['{0:.2%}'.format(value) for value in confusion_mtrx.flatten() / np.sum(confusion_mtrx)]
+            labels =[f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in zip(group_names, group_counts, group_percentages)]
+            labels = np.asarray(labels).reshape(2, 2)
+            ax = plt.axes()
+            sns.heatmap(confusion_mtrx, annot=labels, fmt='', cmap='Blues')
+            ax.set_title("Matrice de confusion du modèle")
         if accuracy:
             accu = metrics.accuracy_score(y, y_pred)
             print(f"accuracy du modèle : {accu}")
