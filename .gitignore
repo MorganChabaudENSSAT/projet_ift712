@@ -1,0 +1,5 @@
+heart.csv
+__pycache__/modele.cpython-310.pyc
+__pycache__/regression_logistique.cpython-310.pyc
+__pycache__/reseau_neurone.cpython-310.pyc
+__pycache__/svm.cpython-310.pyc
